@@ -1,17 +1,13 @@
-// PixiJSを読み込み
-import * as PIXI from "pixi.js";
+import { Game } from "./engine";
 
-// ステージを作る
-const createApp = async () => {
-  // アプリケーションを初期化
-  const app = new PIXI.Application();
-  await app.init({
-    width: 800,
-    height: 600,
-    backgroundColor: 0xcccccc, // 背景色(= #cccccc)
+const game = new Game();
+game
+  .init({
+    width: 320,
+    height: 240,
+    backgroundColor: 0xcccccc,
+    resolution: 4,
+  })
+  .then(() => {
+    // Start the game
   });
-  document.body.appendChild(app.canvas); // viewの代わりにcanvasを使用
-  return app;
-};
-
-createApp();
