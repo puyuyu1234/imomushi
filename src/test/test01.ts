@@ -41,6 +41,7 @@ class Circle extends Actor {
       })
       .circle(0, 0, r)
       .stroke();
+
     this.displayObject.addChild(circle);
     this.displayObject.x = x;
     this.displayObject.y = y;
