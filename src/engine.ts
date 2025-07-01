@@ -88,3 +88,11 @@ export class Actor {
     this.displayObject.destroy({ children: true });
   }
 }
+
+export class ParticleActor extends Actor {
+  public displayObject: PIXI.ParticleContainer;
+  constructor(options?: PIXI.ParticleContainerOptions) {
+    super();
+    this.displayObject = new PIXI.ParticleContainer(options);
+  }
+}
