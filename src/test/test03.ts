@@ -53,7 +53,9 @@ class Particles extends Actor {
 
   update() {
     const nearestPoints = [{ original: { x: 0, y: 0 }, other: { x: 0, y: 0 } }];
-    for (const point of this.points) {
+    const nearNum = Array(this.points.length).fill(0);
+    for (const pointId in this.points) {
+      const point = this.points[pointId];
       const velocity = 0.05;
       point.vx += (Math.random() - 0.5) * velocity;
       point.vy += (Math.random() - 0.5) * velocity;
@@ -75,17 +77,25 @@ class Particles extends Actor {
       }
 
       let minDist = Infinity;
-      let nearestPoint = { x: 0, y: 0 };
-      for (const other of this.points) {
-        if (point === other) continue;
+      let nearestPoint = { x: 0, y: 0, id: "" };
+      for (const otherId in this.points) {
+        if (pointId === otherId) continue;
+        const other = this.points[otherId];
         const dx = point.graphic.x - other.graphic.x;
         const dy = point.graphic.y - other.graphic.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < minDist) {
+          if (nearNum[pointId] == otherId) continue;
           minDist = dist;
-          nearestPoint = { x: other.graphic.x, y: other.graphic.y };
+          nearestPoint = {
+            x: other.graphic.x,
+            y: other.graphic.y,
+            id: otherId,
+          };
         }
       }
+      nearNum[pointId] = nearestPoint.id;
+      nearNum[nearestPoint.id] = pointId;
       nearestPoints.push({
         original: { x: point.graphic.x, y: point.graphic.y },
         other: nearestPoint,
