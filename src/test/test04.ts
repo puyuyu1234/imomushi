@@ -43,7 +43,7 @@ const GAME_CONFIG = {
   BLOCK: {
     MIN_SIZE: 20,
     MAX_SIZE: 60,
-    SPAWN_INTERVAL: 45, // フレーム数
+    SPAWN_INTERVAL: 30, // フレーム数
     MIN_SPEED: 1,
     MAX_SPEED: 2.5,
   },
@@ -87,8 +87,13 @@ game
     width: WIDTH,
     height: HEIGHT,
     backgroundColor: 0xaaaaaa,
+    preference: "webgl",
+    hello: true,
   })
   .then(async () => {
+    // フレームレートを60fpsに制限
+    game.app.ticker.maxFPS = 60;
+
     await game.loadAsset("player", "img/player.png");
     game.changeScene(new MainScene(game));
   });
@@ -303,7 +308,7 @@ class Thread extends Actor {
       const dx = this.targetX - this.startX;
       const dy = this.targetY - this.startY;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance > 0) {
         this.directionX = dx / distance;
         this.directionY = dy / distance;
