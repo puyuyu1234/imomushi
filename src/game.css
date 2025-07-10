@@ -1,0 +1,9 @@
+canvas {
+  width: 100%;
+  image-rendering: pixelated;
+}
+
+#canvasContainer {
+  width: 100%;
+  margin: 0 auto;
+}

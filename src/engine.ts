@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 export class Game {
   public app: PIXI.Application;
   private currentScene: Scene | null = null;
+  private assets: Map<string, PIXI.Texture> = new Map();
 
   constructor() {
     this.app = new PIXI.Application();
@@ -18,6 +19,20 @@ export class Game {
       throw new Error("Canvas container not found");
     }
     canvasContainer.appendChild(this.app.canvas);
+  }
+
+  async loadAsset(key: string, path: string): Promise<PIXI.Texture> {
+    if (this.assets.has(key)) {
+      return this.assets.get(key)!;
+    }
+    
+    const texture = await PIXI.Assets.load(path);
+    this.assets.set(key, texture);
+    return texture;
+  }
+
+  getAsset(key: string): PIXI.Texture | undefined {
+    return this.assets.get(key);
   }
 
   changeScene(newScene: Scene) {
@@ -38,9 +53,9 @@ export class Game {
 
 export class Scene {
   public displayObject: PIXI.Container;
-  private actors: Actor[] = [];
+  protected actors: Actor[] = [];
 
-  constructor(private game: Game) {
+  constructor(protected game: Game) {
     this.displayObject = new PIXI.Container();
   }
 
