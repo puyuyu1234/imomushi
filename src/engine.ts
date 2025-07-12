@@ -59,7 +59,7 @@ export class Game {
       this.input.update();
     }
     if (this.currentScene) {
-      this.currentScene.update();
+      this.currentScene.update(this.input);
     }
   }
 }
@@ -72,9 +72,9 @@ export class Scene {
     this.displayObject = new PIXI.Container();
   }
 
-  update() {
+  update(input: Input | null) {
     this.actors.forEach((actor) => {
-      actor.update();
+      actor.update(input);
     });
   }
 
@@ -110,7 +110,7 @@ export class Actor {
     return this;
   }
 
-  update() {}
+  update(input: Input | null) {}
 
   destroy() {
     this.displayObject.destroy({ children: true });
@@ -131,8 +131,8 @@ export abstract class PhysicsActor extends Actor {
   public vx: number = 0;
   public vy: number = 0;
   
-  update() {
-    super.update();
+  update(input: Input | null) {
+    super.update(input);
     this.x += this.vx;
     this.y += this.vy;
     this.updateDisplayPosition();
@@ -209,7 +209,7 @@ export class Input {
   private pressedKeys: Set<string> = new Set();
   private mousePressed: boolean = false;
 
-  constructor(private target: HTMLElement) {
+  constructor(private target: HTMLCanvasElement) {
     this.setupEventListeners();
   }
 
@@ -247,13 +247,23 @@ export class Input {
       e.preventDefault();
       this.mousePressed = false;
     });
+
+    // マウスがcanvasの外に出た時の処理
+    this.target.addEventListener('pointerleave', (e) => {
+      e.preventDefault();
+      this.mousePressed = false;
+    });
   }
 
   private updatePointerPosition(e: PointerEvent) {
     const rect = this.target.getBoundingClientRect();
+    // CSS変形を考慮した座標計算
+    const scaleX = this.target.width / rect.width;
+    const scaleY = this.target.height / rect.height;
+    
     this.mousePosition = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
     };
   }
 
