@@ -1,5 +1,17 @@
 import * as PIXI from "pixi.js";
 
+/**
+ * ⚠️ 【重要】このファイルは使用しないでください ⚠️
+ * 
+ * このファイル（engine_old.ts）は互換性のためのみ保持されています。
+ * 新規開発では必ず engine/ ディレクトリ配下のファイル群を使用してください。
+ * 
+ * 正しいインポート方法:
+ * import { Game, Scene, Actor } from "./engine";
+ * 
+ * 詳細は CLAUDE.md の開発ガイドライン を参照してください。
+ */
+
 // 共通型定義
 export type Point2D = { x: number; y: number };
 export type Velocity2D = { vx: number; vy: number };

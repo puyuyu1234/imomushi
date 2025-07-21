@@ -1,4 +1,4 @@
-import { Actor, Game, Scene } from "../engine";
+import { Actor, Game, Scene } from "../engine_old";
 import * as PIXI from "pixi.js";
 
 const WIDTH = 240;
@@ -158,9 +158,9 @@ class GameOverScene extends Scene {
     this.retryText.visible = false;
     this.displayObject.addChild(this.retryText);
 
-    // mousedownイベント
+    // pointerdownイベント
     this.clickHandler = this.onCanvasClick.bind(this);
-    this.game.app.canvas.addEventListener("mousedown", this.clickHandler);
+    this.game.app.canvas.addEventListener("pointerdown", this.clickHandler);
   }
 
   update() {
@@ -182,7 +182,7 @@ class GameOverScene extends Scene {
 
   destroy() {
     // イベントリスナーを削除（保存したハンドラーを使用）
-    this.game.app.canvas.removeEventListener("mousedown", this.clickHandler);
+    this.game.app.canvas.removeEventListener("pointerdown", this.clickHandler);
     super.destroy();
   }
 }
@@ -534,7 +534,10 @@ class Head extends Actor {
   private directionAngle: number = 0; // 主人公の向き（度数法）
   private ridingBlock: Block | null = null; // 乗っているブロック
 
-  constructor(private game: Game, private scene: Scene) {
+  constructor(
+    private game: Game,
+    private scene: Scene
+  ) {
     super();
     this.init();
   }
@@ -556,14 +559,14 @@ class Head extends Actor {
     this.displayObject.addChild(this.sprite);
     this.updateSpritePosition();
 
-    // マウスイベントリスナーを追加
+    // ポインターイベントリスナーを追加
     this.game.app.canvas.addEventListener(
-      "mousedown",
+      "pointerdown",
       this.onMouseDown.bind(this)
     );
-    this.game.app.canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
+    this.game.app.canvas.addEventListener("pointerup", this.onMouseUp.bind(this));
     this.game.app.canvas.addEventListener(
-      "mouseleave",
+      "pointerleave",
       this.onMouseUp.bind(this)
     );
 
@@ -846,7 +849,7 @@ class Head extends Actor {
     return { x: this.x, y: this.y };
   }
 
-  private onMouseDown(event: MouseEvent) {
+  private onMouseDown(event: PointerEvent) {
     // ゲームオーバー中は糸を発射しない
     const mainScene = this.scene as MainScene;
     if (mainScene.isGameOver) {

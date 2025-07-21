@@ -128,7 +128,7 @@ import { Game, Scene, Actor } from "./engine";
 import { MockGame, MockInput } from "./__mocks__";
 
 // ⚠️ レガシー（互換性のためのみ保持、新規開発では使用しない）
-import { Game } from "./engine.ts";
+import { Game } from "./engine_old";
 ```
 
 ### テスト駆動開発

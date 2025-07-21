@@ -119,7 +119,7 @@ async function main() {
 
   // アセットをロード
   await game.loadAsset("eye", "img/eye.png");
-  
+
   const scene = new GameScene(game);
   game.changeScene(scene);
 }
