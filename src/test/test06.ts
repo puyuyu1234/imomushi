@@ -13,9 +13,11 @@ class BlinkingCharacter extends Actor {
   private animationSpeed: number = 4; // フレーム数
   private waitFrames: number = 0; // 待機フレーム数
   private currentWaitTime: number = 0; // 現在の待機時間
+  private game: Game;
 
-  constructor() {
+  constructor(game: Game) {
     super();
+    this.game = game;
     this.setupSprite();
     this.setRandomWaitTime();
   }
@@ -26,9 +28,9 @@ class BlinkingCharacter extends Actor {
     this.waitFrames = 0;
   }
 
-  private async setupSprite() {
-    // eye.pngをロード
-    this.eyeTexture = await PIXI.Assets.load("/img/eye.png");
+  private setupSprite() {
+    // Gameクラスでロード済みのテクスチャを取得
+    this.eyeTexture = this.game.getAsset("eye")!;
 
     // ピクセルアートのためのフィルタリング設定
     this.eyeTexture.source.scaleMode = "nearest";
@@ -101,7 +103,7 @@ class BlinkingCharacter extends Actor {
 class GameScene extends Scene {
   constructor(game: Game) {
     super(game);
-    const character = new BlinkingCharacter();
+    const character = new BlinkingCharacter(game);
     character.addTo(this);
   }
 }
@@ -115,6 +117,9 @@ async function main() {
     backgroundAlpha: 0, // 背景を透明にする
   });
 
+  // アセットをロード
+  await game.loadAsset("eye", "img/eye.png");
+  
   const scene = new GameScene(game);
   game.changeScene(scene);
 }
