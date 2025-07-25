@@ -22,7 +22,9 @@ export class Game {
       throw new Error("Canvas container not found");
     }
     canvasContainer.appendChild(this.app.canvas);
-    
+
+    (this.app.canvas as HTMLCanvasElement).setAttribute("tabindex", "0");
+
     // Input初期化
     this.input = new Input(this.app.canvas as HTMLCanvasElement);
   }

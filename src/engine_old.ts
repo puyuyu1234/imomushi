@@ -2,13 +2,13 @@ import * as PIXI from "pixi.js";
 
 /**
  * ⚠️ 【重要】このファイルは使用しないでください ⚠️
- * 
+ *
  * このファイル（engine_old.ts）は互換性のためのみ保持されています。
  * 新規開発では必ず engine/ ディレクトリ配下のファイル群を使用してください。
- * 
+ *
  * 正しいインポート方法:
  * import { Game, Scene, Actor } from "./engine";
- * 
+ *
  * 詳細は CLAUDE.md の開発ガイドライン を参照してください。
  */
 
@@ -38,7 +38,9 @@ export class Game {
       throw new Error("Canvas container not found");
     }
     canvasContainer.appendChild(this.app.canvas);
-    
+
+    (this.app.canvas as HTMLCanvasElement).setAttribute("tabindex", "0");
+
     // Input初期化
     this.input = new Input(this.app.canvas as HTMLCanvasElement);
   }
@@ -105,7 +107,7 @@ export class Scene {
   }
 
   destroy() {
-    this.actors.forEach((actor) => this.removeActor(actor));
+    [...this.actors].forEach((actor) => this.removeActor(actor));
     this.displayObject.destroy();
   }
 }
@@ -142,16 +144,16 @@ export abstract class PhysicsActor extends Actor {
   protected y: number = 0;
   public vx: number = 0;
   public vy: number = 0;
-  
+
   update(input: Input | null) {
     super.update(input);
     this.x += this.vx;
     this.y += this.vy;
     this.updateDisplayPosition();
   }
-  
+
   protected abstract updateDisplayPosition(): void;
-  
+
   getPosition(): Point2D {
     return { x: this.x, y: this.y };
   }
@@ -207,7 +209,7 @@ export function createRect(
  * - updateメソッドで毎フレーム状態を更新
  *   - 押下中: 値を+1（最小1）
  *   - 押上中: 値を-1（最大-1）
- * 
+ *
  * 使用例:
  * - キーを押した瞬間: keyState === 1
  * - キーを離した瞬間: keyState === -1
@@ -227,41 +229,41 @@ export class Input {
 
   private setupEventListeners() {
     // キーボードイベント
-    this.target.addEventListener('keydown', (e) => {
+    this.target.addEventListener("keydown", (e) => {
       e.preventDefault();
       this.pressedKeys.add(e.code);
     });
 
-    this.target.addEventListener('keyup', (e) => {
+    this.target.addEventListener("keyup", (e) => {
       e.preventDefault();
       this.pressedKeys.delete(e.code);
     });
 
     // ポインターイベント（マウス・タッチ・ペンを統合）
-    this.target.addEventListener('pointerdown', (e) => {
+    this.target.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       this.mousePressed = true;
       this.updatePointerPosition(e);
     });
 
-    this.target.addEventListener('pointerup', (e) => {
+    this.target.addEventListener("pointerup", (e) => {
       e.preventDefault();
       this.mousePressed = false;
       this.updatePointerPosition(e);
     });
 
-    this.target.addEventListener('pointermove', (e) => {
+    this.target.addEventListener("pointermove", (e) => {
       this.updatePointerPosition(e);
     });
 
     // ポインターキャプチャを解放（ブラウザ外でのpointerupを確実に検知）
-    this.target.addEventListener('pointercancel', (e) => {
+    this.target.addEventListener("pointercancel", (e) => {
       e.preventDefault();
       this.mousePressed = false;
     });
 
     // マウスがcanvasの外に出た時の処理
-    this.target.addEventListener('pointerleave', (e) => {
+    this.target.addEventListener("pointerleave", (e) => {
       e.preventDefault();
       this.mousePressed = false;
     });
@@ -272,10 +274,10 @@ export class Input {
     // CSS変形を考慮した座標計算
     const scaleX = this.target.width / rect.width;
     const scaleY = this.target.height / rect.height;
-    
+
     this.mousePosition = {
       x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
+      y: (e.clientY - rect.top) * scaleY,
     };
   }
 

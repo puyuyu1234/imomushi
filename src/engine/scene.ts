@@ -32,7 +32,7 @@ export class Scene {
   }
 
   destroy() {
-    this.actors.forEach((actor) => this.removeActor(actor));
+    [...this.actors].forEach((actor) => this.removeActor(actor));
     this.displayObject.destroy();
   }
 }
