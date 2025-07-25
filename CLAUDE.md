@@ -1,193 +1,169 @@
-# imomushi プロジェクト構成ドキュメント
+# CLAUDE.md
 
-## プロジェクト概要
-TypeScript + PIXI.js + Viteを使用したゲームエンジンプロジェクト。
-テスト駆動開発（TDD）とモジュール化を重視した設計。
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 技術スタック
-- **フロントエンド**: TypeScript, PIXI.js 8.10.2
-- **ビルドツール**: Vite 7.0.0
-- **パッケージマネージャー**: npm
-- **テストフレームワーク**: Jest (想定)
+## Project Overview
 
-## プロジェクト構成
+This is a TypeScript + PIXI.js + Vite game engine project focused on modular design and test-driven development (TDD). The engine follows a Game/Scene/Actor architecture pattern with comprehensive mock implementations for testing.
 
-### ルートディレクトリ
-```
-imomushi/
-├── package.json          # プロジェクト設定と依存関係
-├── vite.config.js        # Viteビルド設定
-├── index.html            # メインHTML
-├── test0X.html           # テストページ群
-├── dist/                 # ビルド成果物
-├── node_modules/         # 依存関係
-├── public/               # 静的アセット
-│   └── img/              # 画像リソース
-├── src/                  # メインソースコード
-└── summary/              # 設計ドキュメント
+**Key Architecture**: Game manages time/input/scenes, Scenes contain state logic and manage Actors, Actors represent individual game elements (players, enemies, mechanics).
+
+**Testing Philosophy**: Emphasizes separation of rendering and logic, state predictability, injectability, and observability using frame-based control and testing.
+
+## Development Commands
+
+### Build & Run
+
+```bash
+npm run dev         # Start development server with hot reload
+npm run build       # Build for production
+npm run preview     # Preview production build
 ```
 
-### src/ ディレクトリ構成
+### Code Quality
 
-#### メインファイル
-- `main.ts` - アプリケーションエントリーポイント
-- `game.css` - ゲーム用CSS
-- `engine.ts` - レガシーエンジン（互換性のため保持）
-
-#### engine/ ディレクトリ（メインエンジン）
-```
-engine/
-├── index.ts          # エクスポート統合
-├── types.ts          # 型定義
-├── game.ts           # Gameクラス
-├── scene.ts          # Sceneクラス
-├── actor.ts          # Actor関連クラス
-├── input.ts          # Inputクラス
-└── helpers.ts        # ヘルパー関数
+Always run these after making changes:
+```bash
+npm run lint        # Run linter (if configured)
+npm run typecheck   # TypeScript type checking (if configured)
 ```
 
-#### __mocks__/ ディレクトリ（テスト用モック）
-```
-__mocks__/
-├── index.ts          # モックエクスポート
-├── game.mock.ts      # MockGameクラス
-└── input.mock.ts     # MockInputクラス
-```
+## Technology Stack
 
-#### test/ ディレクトリ（テストファイル）
-```
-test/
-├── test01.ts         # 基本テスト
-├── test02.ts         # 機能テスト
-├── test03.ts         # 統合テスト
-├── test04.ts         # エンジン拡張テスト
-└── test05.ts         # 最新テスト
-```
+- **Frontend**: TypeScript, PIXI.js 8.10.2
+- **Build Tool**: Vite 7.0.0  
+- **Package Manager**: npm
+- **Testing Framework**: Jest (planned)
 
-## アーキテクチャパターン
+## Development Methodology
 
-### Game/Scene/Actor構造
-- **Game**: 時間・入力・シーンの管理を担う薄い制御層
-- **Scene**: 状態変化の本体、Actorたちを束ねる
-- **Actor**: プレイヤー、敵、ギミックなどの個別要素
+**Test-Driven Development (TDD)**: Follow TDD principles for all development:
 
-### クラス階層
-```
-Actor (基底クラス)
-├── ParticleActor (パーティクル用)
-└── PhysicsActor (物理演算用、抽象クラス)
-```
+1. Write a failing test first (Red)
+2. Write the minimum code to make the test pass (Green)  
+3. Refactor while keeping tests passing (Refactor)
 
-### 依存関係
-```
-Game → Scene → Actor
-  ↓      ↓
-Input → フレーム更新
-```
+**Mock-First Engine Development**: Use MockGame and MockInput for engine development testing to eliminate PIXI dependencies and enable frame-based testing.
 
-## 型定義（types.ts）
+## Project Structure
 
-### 基本型
-- `Point2D`: 2D座標 `{x: number, y: number}`
-- `Velocity2D`: 2D速度 `{vx: number, vy: number}`
-- `Rectangle`: 矩形 `{x, y, width, height}`
-- `Size2D`: サイズ `{width, height}`
+### Main Development Areas
 
-## Input仕様
+- **Primary Development**: Use files in `src/engine/` directory
+- **Legacy Code**: `src/engine.ts` is kept for compatibility only - DO NOT update
+- **New Features**: Must be developed within `src/engine/` directory
 
-### 状態管理
-キー・マウスの状態を数値で管理：
-- `0`: 未使用
-- `1以上`: 押下中（1=押した瞬間、2以上=継続）
-- `-1以下`: 離した状態（-1=離した瞬間、-2以下=継続）
+### Import Guidelines
 
-### 主要メソッド
-- `isKeyPressed(key)`: キーが押されているか
-- `isKeyJustPressed(key)`: キーを押した瞬間か
-- `isKeyJustReleased(key)`: キーを離した瞬間か
-- `getMousePosition()`: マウス座標取得
-
-## テスト用モック
-
-### MockGame特徴
-- PIXI依存を排除
-- updateCallCount等のテスト用プロパティ
-- ダミーTextureによる軽量アセット読み込み
-
-### MockInput特徴
-- フレームベースの入力スケジューリング
-- 即座の状態変更メソッド
-- デバッグ用状態取得機能
-
-## 開発ガイドライン
-
-### インポート方法
 ```typescript
-// 標準（メイン開発で使用）
+// Engine usage (for creating games/examples)
 import { Game, Scene, Actor } from "./engine";
+
+// Engine development (for testing engine itself)
 import { MockGame, MockInput } from "./__mocks__";
 
-// ⚠️ レガシー（互換性のためのみ保持、新規開発では使用しない）
+// ⚠️ Legacy (compatibility only - do not use for new development)
 import { Game } from "./engine_old";
 ```
 
-### テスト駆動開発
-1. MockGameとMockInputを使用
-2. フレーム単位でのテスト実行
-3. 状態の観測可能性を重視
-4. 副作用の排除
+## Architecture Guidelines
 
-### ファイル命名規則
-- `*.ts`: TypeScriptソース
-- `*.mock.ts`: モック実装
-- `test*.ts`: テストファイル
-- `index.ts`: エクスポート統合
+### Core Classes
 
-## ビルド・実行
+- **Game**: Thin control layer managing time, input, and scenes
+- **Scene**: Main state logic container, manages collection of Actors
+- **Actor**: Base class for game elements (players, enemies, mechanics)
+  - **ParticleActor**: Specialized for particle effects
+  - **PhysicsActor**: Abstract class for physics-enabled entities
 
-### 開発サーバー
-```bash
-npm run dev
-```
+### Input System
 
-### ビルド
-```bash
-npm run build
-```
+The Input class uses numeric state management:
+- `0`: Unused
+- `1+`: Pressed (1=just pressed, 2+=continued)
+- `-1-`: Released (-1=just released, -2-=continued)
 
-### プレビュー
-```bash
-npm run preview
-```
+Key methods: `isKeyPressed()`, `isKeyJustPressed()`, `isKeyJustReleased()`, `getMousePosition()`
 
-## 設計ドキュメント
-`summary/` ディレクトリに以下の設計資料を格納：
+## Development Strategy
 
-- `test_mock_implementation_plan.md`: モック実装方針
-- `test04_engine_extensions.md`: エンジン拡張仕様
-- `test04_refactoring.md`: リファクタリング履歴
-- `test04_structure.md`: 構造設計
-- `engine_todo.md`: エンジン開発TODO
+### Engine Examples and Demos
 
-## 注意事項
+The `src/test/` directory contains practical examples of games and features built using the engine:
+- `test01.ts` through `test06.ts` are runnable examples demonstrating engine capabilities
+- Each example has a corresponding `testXX.html` file for browser execution
+- These serve as both feature demonstrations and integration tests for the engine
 
-### 開発方針
-- **メイン開発**: `engine/`ディレクトリ配下のファイル群を使用・更新
-- **レガシー**: `engine.ts`は互換性のためのみ保持（更新しない）
-- **新機能**: 必ず`engine/`ディレクトリ内で開発
+### Engine Development Testing
 
-### テスト方針
-- 描画とロジックの分離
-- 状態の予測可能性・注入可能性・観測可能性を重視
-- フレーム単位での制御とテスト
+For engine development itself, use mock classes to eliminate PIXI dependencies:
 
-### エラーハンドリング
-- Canvas要素の存在確認
-- アセット読み込み失敗時の処理
-- 入力イベントの適切な処理
+**MockGame Features**:
+- PIXI dependency elimination
+- Test-specific properties (updateCallCount, etc.)
+- Dummy texture loading for lightweight asset handling
 
-## 今後の拡張予定
-- Jest設定とテストスイート構築
-- リプレイ機能の実装
-- パフォーマンス計測機能
-- より高度な物理演算システム
+**MockInput Features**:
+- Frame-based input scheduling
+- Immediate state change methods
+- Debug state inspection capabilities
+
+### Engine Testing Requirements
+
+1. Use MockGame and MockInput for engine development testing
+2. Execute tests in frame-based increments
+3. Prioritize state observability
+4. Eliminate side effects
+
+## Development Process
+
+### File Organization
+
+- `*.ts`: TypeScript source files
+- `*.mock.ts`: Engine development mock implementations
+- `test*.ts`: Engine usage examples and feature demonstrations
+- `index.ts`: Export aggregation files
+- `testXX.html`: Browser execution pages for examples
+
+### Error Handling Requirements
+
+- Canvas element existence verification
+- Asset loading failure handling
+- Proper input event processing
+
+## Implementation Guidelines
+
+### When Adding Engine Features
+
+1. **Test First**: Write failing tests using MockGame/MockInput
+2. **Minimal Implementation**: Write minimum code to pass tests
+3. **Refactor**: Clean up while maintaining test coverage
+4. **Integration**: Ensure compatibility with existing Game/Scene/Actor pattern
+5. **Example Creation**: Create practical examples in `src/test/` to demonstrate new features
+6. **Documentation**: Update inline documentation as needed
+
+### When Creating Examples/Games
+
+1. **Use Engine**: Import from `./engine` for all game logic
+2. **Follow Patterns**: Use established Game/Scene/Actor architecture
+3. **Create HTML**: Add corresponding `testXX.html` file for browser execution
+4. **Demonstrate Features**: Focus on showcasing specific engine capabilities
+
+### Code Quality Standards
+
+- Follow existing TypeScript conventions
+- Maintain separation between rendering and logic
+- Use frame-based testing approach
+- Ensure state predictability and observability
+- Keep PIXI dependencies isolated from core logic
+
+### Current Development Status
+
+The project uses a modular engine architecture with comprehensive mocking for testability. Main development should focus on the `src/engine/` directory while maintaining the established Game/Scene/Actor pattern.
+
+## Notes
+
+- The `summary/` directory contains design documentation and development history
+- Test pages (test0X.html) are available for manual testing
+- All new development must follow the established architectural patterns
+- Legacy engine.ts file should not be modified - use engine/ directory instead
