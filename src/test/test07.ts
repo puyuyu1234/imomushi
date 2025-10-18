@@ -110,7 +110,7 @@ const transport = Tone.getTransport();
 async function loadMidi(fileName: string = 'test1.mid') {
   try {
     statusText.textContent = 'Loading MIDI...';
-    const response = await fetch(`/public/sound/${fileName}`);
+    const response = await fetch(`/sound/${fileName}`);
     const arrayBuffer = await response.arrayBuffer();
     midiData = new Midi(arrayBuffer);
     currentFileText.textContent = fileName;
