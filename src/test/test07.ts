@@ -3,13 +3,13 @@
  * Demonstrates seamless MIDI looping using Tone.js
  */
 
-import * as Tone from 'tone';
-import { Midi } from '@tonejs/midi';
+import * as Tone from "tone";
+import { Midi } from "@tonejs/midi";
 
 // UI Controls
-const container = document.getElementById('canvasContainer');
+const container = document.getElementById("canvasContainer");
 if (!container) {
-  throw new Error('Canvas container not found');
+  throw new Error("Canvas container not found");
 }
 
 // Create UI
@@ -55,22 +55,27 @@ container.innerHTML = `
     </div>
     <div style="margin: 20px 0;">
       <div style="margin-bottom: 10px;"><strong>ADSR Envelope</strong></div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
-        <div>
-          <label>A: <span id="attackValue">0.01</span>s</label>
-          <input id="attackSlider" type="range" min="0.001" max="2" value="0.01" step="0.001" style="width: 100%;" />
-        </div>
-        <div>
-          <label>D: <span id="decayValue">0.1</span>s</label>
-          <input id="decaySlider" type="range" min="0.001" max="2" value="0.1" step="0.001" style="width: 100%;" />
-        </div>
-        <div>
-          <label>S: <span id="sustainValue">0.5</span></label>
-          <input id="sustainSlider" type="range" min="0" max="1" value="0.5" step="0.01" style="width: 100%;" />
-        </div>
-        <div>
-          <label>R: <span id="releaseValue">1.0</span>s</label>
-          <input id="releaseSlider" type="range" min="0.001" max="5" value="1.0" step="0.001" style="width: 100%;" />
+      <div style="gap: 20px; align-items: flex-start;">
+        <div style="flex: 1;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <label>A: <span id="attackValue">0.01</span>s</label>
+              <input id="attackSlider" type="range" min="0.001" max="2" value="0.01" step="0.001" style="width: 100%;" />
+            </div>
+            <div>
+              <label>D: <span id="decayValue">0.1</span>s</label>
+              <input id="decaySlider" type="range" min="0.001" max="2" value="0.1" step="0.001" style="width: 100%;" />
+            </div>
+            <div>
+              <label>S: <span id="sustainValue">0.5</span></label>
+              <input id="sustainSlider" type="range" min="0" max="1" value="0.5" step="0.01" style="width: 100%;" />
+            </div>
+            <div>
+              <label>R: <span id="releaseValue">1.0</span>s</label>
+              <input id="releaseSlider" type="range" min="0.001" max="5" value="1.0" step="0.001" style="width: 100%;" />
+            </div>
+          </div>
+        <canvas id="adsrCanvas" width="400" height="200" style="border: 1px solid #666; background: #0a0a0a;"></canvas>
         </div>
       </div>
     </div>
@@ -83,29 +88,43 @@ container.innerHTML = `
   </div>
 `;
 
-const midiSelect = document.getElementById('midiSelect') as HTMLSelectElement;
-const loadBtn = document.getElementById('loadBtn') as HTMLButtonElement;
-const playBtn = document.getElementById('playBtn') as HTMLButtonElement;
-const stopBtn = document.getElementById('stopBtn') as HTMLButtonElement;
-const loopBtn = document.getElementById('loopBtn') as HTMLButtonElement;
-const synthSelect = document.getElementById('synthSelect') as HTMLSelectElement;
-const waveformSelect = document.getElementById('waveformSelect') as HTMLSelectElement;
-const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
-const volumeValue = document.getElementById('volumeValue') as HTMLSpanElement;
-const statusText = document.getElementById('status') as HTMLSpanElement;
-const timeText = document.getElementById('time') as HTMLSpanElement;
-const loopStatusText = document.getElementById('loopStatus') as HTMLSpanElement;
-const currentFileText = document.getElementById('currentFile') as HTMLSpanElement;
+const midiSelect = document.getElementById("midiSelect") as HTMLSelectElement;
+const loadBtn = document.getElementById("loadBtn") as HTMLButtonElement;
+const playBtn = document.getElementById("playBtn") as HTMLButtonElement;
+const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
+const loopBtn = document.getElementById("loopBtn") as HTMLButtonElement;
+const synthSelect = document.getElementById("synthSelect") as HTMLSelectElement;
+const waveformSelect = document.getElementById(
+  "waveformSelect"
+) as HTMLSelectElement;
+const volumeSlider = document.getElementById(
+  "volumeSlider"
+) as HTMLInputElement;
+const volumeValue = document.getElementById("volumeValue") as HTMLSpanElement;
+const statusText = document.getElementById("status") as HTMLSpanElement;
+const timeText = document.getElementById("time") as HTMLSpanElement;
+const loopStatusText = document.getElementById("loopStatus") as HTMLSpanElement;
+const currentFileText = document.getElementById(
+  "currentFile"
+) as HTMLSpanElement;
 
 // ADSR controls
-const attackSlider = document.getElementById('attackSlider') as HTMLInputElement;
-const decaySlider = document.getElementById('decaySlider') as HTMLInputElement;
-const sustainSlider = document.getElementById('sustainSlider') as HTMLInputElement;
-const releaseSlider = document.getElementById('releaseSlider') as HTMLInputElement;
-const attackValue = document.getElementById('attackValue') as HTMLSpanElement;
-const decayValue = document.getElementById('decayValue') as HTMLSpanElement;
-const sustainValue = document.getElementById('sustainValue') as HTMLSpanElement;
-const releaseValue = document.getElementById('releaseValue') as HTMLSpanElement;
+const adsrCanvas = document.getElementById("adsrCanvas") as HTMLCanvasElement;
+const adsrCtx = adsrCanvas.getContext("2d")!;
+const attackSlider = document.getElementById(
+  "attackSlider"
+) as HTMLInputElement;
+const decaySlider = document.getElementById("decaySlider") as HTMLInputElement;
+const sustainSlider = document.getElementById(
+  "sustainSlider"
+) as HTMLInputElement;
+const releaseSlider = document.getElementById(
+  "releaseSlider"
+) as HTMLInputElement;
+const attackValue = document.getElementById("attackValue") as HTMLSpanElement;
+const decayValue = document.getElementById("decayValue") as HTMLSpanElement;
+const sustainValue = document.getElementById("sustainValue") as HTMLSpanElement;
+const releaseValue = document.getElementById("releaseValue") as HTMLSpanElement;
 
 // Synth setup
 let synth: any = new Tone.PolySynth(Tone.Synth).toDestination();
@@ -119,16 +138,16 @@ function createSynth(type: string): any {
   let newSynth: any;
 
   switch (type) {
-    case 'AMSynth':
+    case "AMSynth":
       newSynth = new Tone.PolySynth(Tone.AMSynth).toDestination();
       break;
-    case 'FMSynth':
+    case "FMSynth":
       newSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
       break;
-    case 'MonoSynth':
+    case "MonoSynth":
       newSynth = new Tone.PolySynth(Tone.MonoSynth).toDestination();
       break;
-    case 'DuoSynth':
+    case "DuoSynth":
       newSynth = new Tone.PolySynth(Tone.DuoSynth).toDestination();
       break;
     default:
@@ -147,28 +166,28 @@ let currentPart: Tone.Part | null = null;
 const transport = Tone.getTransport();
 
 // Load MIDI file
-async function loadMidi(fileName: string = 'test1.mid') {
+async function loadMidi(fileName: string = "test1.mid") {
   try {
-    statusText.textContent = 'Loading MIDI...';
+    statusText.textContent = "Loading MIDI...";
     // Use relative path to work with both dev and production builds
     const response = await fetch(`./sound/${fileName}`);
     const arrayBuffer = await response.arrayBuffer();
     midiData = new Midi(arrayBuffer);
     currentFileText.textContent = fileName;
-    statusText.textContent = 'MIDI Loaded';
-    console.log('MIDI loaded:', midiData.name);
-    console.log('Duration:', midiData.duration, 'seconds');
-    console.log('Tracks:', midiData.tracks.length);
+    statusText.textContent = "MIDI Loaded";
+    console.log("MIDI loaded:", midiData.name);
+    console.log("Duration:", midiData.duration, "seconds");
+    console.log("Tracks:", midiData.tracks.length);
   } catch (error) {
-    statusText.textContent = 'Error loading MIDI';
-    console.error('Failed to load MIDI:', error);
+    statusText.textContent = "Error loading MIDI";
+    console.error("Failed to load MIDI:", error);
   }
 }
 
 // Play MIDI
 function playMidi() {
   if (!midiData) {
-    console.error('MIDI not loaded');
+    console.error("MIDI not loaded");
     return;
   }
 
@@ -186,7 +205,12 @@ function playMidi() {
   Tone.start();
 
   // Schedule all notes from all tracks
-  const events: Array<{ time: number; note: string; duration: number; velocity: number }> = [];
+  const events: Array<{
+    time: number;
+    note: string;
+    duration: number;
+    velocity: number;
+  }> = [];
 
   midiData.tracks.forEach((track: any) => {
     track.notes.forEach((note: any) => {
@@ -218,7 +242,7 @@ function playMidi() {
   currentPart.start(0);
   transport.start();
 
-  statusText.textContent = 'Playing';
+  statusText.textContent = "Playing";
   updateTimeDisplay();
 }
 
@@ -230,8 +254,8 @@ function stopMidi() {
   transport.stop();
   transport.cancel(0);
   transport.position = 0;
-  statusText.textContent = 'Stopped';
-  timeText.textContent = '0.00';
+  statusText.textContent = "Stopped";
+  timeText.textContent = "0.00";
 }
 
 // Toggle loop
@@ -240,14 +264,14 @@ function toggleLoop() {
   if (currentPart) {
     currentPart.loop = isLooping;
   }
-  loopBtn.textContent = `Loop: ${isLooping ? 'ON' : 'OFF'}`;
-  loopStatusText.textContent = isLooping ? 'Enabled' : 'Disabled';
+  loopBtn.textContent = `Loop: ${isLooping ? "ON" : "OFF"}`;
+  loopStatusText.textContent = isLooping ? "Enabled" : "Disabled";
 }
 
 // Update time display
 function updateTimeDisplay() {
   const updateTime = () => {
-    if (transport.state === 'started') {
+    if (transport.state === "started") {
       timeText.textContent = transport.seconds.toFixed(2);
       requestAnimationFrame(updateTime);
     }
@@ -256,27 +280,27 @@ function updateTimeDisplay() {
 }
 
 // Event listeners
-loadBtn.addEventListener('click', () => {
+loadBtn.addEventListener("click", () => {
   const selectedFile = midiSelect.value;
   loadMidi(selectedFile);
 });
 
-playBtn.addEventListener('click', playMidi);
-stopBtn.addEventListener('click', stopMidi);
-loopBtn.addEventListener('click', toggleLoop);
+playBtn.addEventListener("click", playMidi);
+stopBtn.addEventListener("click", stopMidi);
+loopBtn.addEventListener("click", toggleLoop);
 
-synthSelect.addEventListener('change', (e) => {
+synthSelect.addEventListener("change", (e) => {
   const selectedType = (e.target as HTMLSelectElement).value;
   synth = createSynth(selectedType);
   // Apply current waveform to new synth
   updateWaveform(waveformSelect.value);
-  console.log('Synth changed to:', selectedType);
+  console.log("Synth changed to:", selectedType);
 });
 
-waveformSelect.addEventListener('change', (e) => {
+waveformSelect.addEventListener("change", (e) => {
   const selectedWaveform = (e.target as HTMLSelectElement).value;
   updateWaveform(selectedWaveform);
-  console.log('Waveform changed to:', selectedWaveform);
+  console.log("Waveform changed to:", selectedWaveform);
 });
 
 // Update synth waveform
@@ -284,41 +308,159 @@ function updateWaveform(waveformType: string) {
   // Set waveform for all voices in PolySynth
   synth.set({
     oscillator: {
-      type: waveformType
-    }
+      type: waveformType,
+    },
   });
 }
 
-volumeSlider.addEventListener('input', (e) => {
+volumeSlider.addEventListener("input", (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   synth.volume.value = value;
   volumeValue.textContent = `${value} dB`;
 });
 
+// Draw ADSR envelope graph
+function drawADSR() {
+  const width = adsrCanvas.width;
+  const height = adsrCanvas.height;
+  const padding = 20;
+  const paddingBottom = 30;
+
+  const attack = parseFloat(attackSlider.value);
+  const decay = parseFloat(decaySlider.value);
+  const sustain = parseFloat(sustainSlider.value);
+  const release = parseFloat(releaseSlider.value);
+
+  // Fixed time scale: 5 seconds total display
+  const maxTime = 5;
+  const timeScale = (width - padding * 2) / maxTime;
+  const ampScale = height - padding - paddingBottom;
+
+  // Clear canvas
+  adsrCtx.fillStyle = "#0a0a0a";
+  adsrCtx.fillRect(0, 0, width, height);
+
+  // Draw vertical grid (time)
+  adsrCtx.strokeStyle = "#333";
+  adsrCtx.lineWidth = 1;
+  adsrCtx.fillStyle = "#ccc";
+  adsrCtx.font = "10px monospace";
+  for (let i = 0; i <= maxTime; i++) {
+    const x = padding + i * timeScale;
+    adsrCtx.beginPath();
+    adsrCtx.moveTo(x, padding);
+    adsrCtx.lineTo(x, height - paddingBottom);
+    adsrCtx.stroke();
+    adsrCtx.fillText(`${i}s`, x - 8, height - 10);
+  }
+
+  // Draw horizontal grid (amplitude)
+  for (let i = 0; i <= 4; i++) {
+    const y = padding + (ampScale * i) / 4;
+    adsrCtx.beginPath();
+    adsrCtx.moveTo(padding, y);
+    adsrCtx.lineTo(width - padding, y);
+    adsrCtx.stroke();
+  }
+
+  // Draw ADSR curve
+  adsrCtx.strokeStyle = "#00ff88";
+  adsrCtx.lineWidth = 3;
+  adsrCtx.beginPath();
+
+  // Start point (0, 0)
+  const startX = padding;
+  const startY = height - paddingBottom;
+  adsrCtx.moveTo(startX, startY);
+
+  // Attack phase
+  const attackX = padding + attack * timeScale;
+  const peakY = padding;
+  adsrCtx.lineTo(Math.min(attackX, width - padding), peakY);
+
+  // Decay phase
+  const decayX = attackX + decay * timeScale;
+  const sustainY = padding + (1 - sustain) * ampScale;
+  if (attackX < width - padding) {
+    adsrCtx.lineTo(Math.min(decayX, width - padding), sustainY);
+  }
+
+  // Sustain phase (0.5 seconds fixed for display)
+  const sustainTime = 0.5;
+  const sustainX = decayX + sustainTime * timeScale;
+  if (decayX < width - padding) {
+    adsrCtx.lineTo(Math.min(sustainX, width - padding), sustainY);
+  }
+
+  // Release phase
+  const releaseX = sustainX + release * timeScale;
+  if (sustainX < width - padding) {
+    adsrCtx.lineTo(Math.min(releaseX, width - padding), startY);
+  }
+
+  adsrCtx.stroke();
+
+  // Draw phase labels
+  adsrCtx.fillStyle = "#00ff88";
+  adsrCtx.font = "12px monospace bold";
+  const labelY = height - paddingBottom + 20;
+  if (attackX < width - padding) {
+    adsrCtx.fillText("A", Math.min(attackX / 2, width - padding - 10), labelY);
+  }
+  if (decayX < width - padding) {
+    adsrCtx.fillText(
+      "D",
+      Math.min((attackX + decayX) / 2, width - padding - 10),
+      labelY
+    );
+  }
+  if (sustainX < width - padding) {
+    adsrCtx.fillText(
+      "S",
+      Math.min((decayX + sustainX) / 2, width - padding - 10),
+      labelY
+    );
+  }
+  if (releaseX < width - padding) {
+    adsrCtx.fillText(
+      "R",
+      Math.min((sustainX + releaseX) / 2, width - padding - 10),
+      labelY
+    );
+  }
+}
+
 // ADSR event listeners
-attackSlider.addEventListener('input', (e) => {
+attackSlider.addEventListener("input", (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   attackValue.textContent = value.toFixed(3);
   synth.set({ envelope: { attack: value } });
+  drawADSR();
 });
 
-decaySlider.addEventListener('input', (e) => {
+decaySlider.addEventListener("input", (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   decayValue.textContent = value.toFixed(3);
   synth.set({ envelope: { decay: value } });
+  drawADSR();
 });
 
-sustainSlider.addEventListener('input', (e) => {
+sustainSlider.addEventListener("input", (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   sustainValue.textContent = value.toFixed(2);
   synth.set({ envelope: { sustain: value } });
+  drawADSR();
 });
 
-releaseSlider.addEventListener('input', (e) => {
+releaseSlider.addEventListener("input", (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   releaseValue.textContent = value.toFixed(3);
   synth.set({ envelope: { release: value } });
+  drawADSR();
 });
 
 // Initialize with default file
-loadMidi('test1.mid');
+loadMidi("test1.mid");
+
+// Draw initial ADSR graph
+drawADSR();
