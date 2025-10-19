@@ -54,6 +54,27 @@ container.innerHTML = `
       <span id="volumeValue">-10 dB</span>
     </div>
     <div style="margin: 20px 0;">
+      <div style="margin-bottom: 10px;"><strong>ADSR Envelope</strong></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+        <div>
+          <label>A: <span id="attackValue">0.01</span>s</label>
+          <input id="attackSlider" type="range" min="0.001" max="2" value="0.01" step="0.001" style="width: 100%;" />
+        </div>
+        <div>
+          <label>D: <span id="decayValue">0.1</span>s</label>
+          <input id="decaySlider" type="range" min="0.001" max="2" value="0.1" step="0.001" style="width: 100%;" />
+        </div>
+        <div>
+          <label>S: <span id="sustainValue">0.5</span></label>
+          <input id="sustainSlider" type="range" min="0" max="1" value="0.5" step="0.01" style="width: 100%;" />
+        </div>
+        <div>
+          <label>R: <span id="releaseValue">1.0</span>s</label>
+          <input id="releaseSlider" type="range" min="0.001" max="5" value="1.0" step="0.001" style="width: 100%;" />
+        </div>
+      </div>
+    </div>
+    <div style="margin: 20px 0;">
       <div>Status: <span id="status">Ready</span></div>
       <div>Time: <span id="time">0.00</span>s</div>
       <div>Loop: <span id="loopStatus">Enabled</span></div>
@@ -75,6 +96,16 @@ const statusText = document.getElementById('status') as HTMLSpanElement;
 const timeText = document.getElementById('time') as HTMLSpanElement;
 const loopStatusText = document.getElementById('loopStatus') as HTMLSpanElement;
 const currentFileText = document.getElementById('currentFile') as HTMLSpanElement;
+
+// ADSR controls
+const attackSlider = document.getElementById('attackSlider') as HTMLInputElement;
+const decaySlider = document.getElementById('decaySlider') as HTMLInputElement;
+const sustainSlider = document.getElementById('sustainSlider') as HTMLInputElement;
+const releaseSlider = document.getElementById('releaseSlider') as HTMLInputElement;
+const attackValue = document.getElementById('attackValue') as HTMLSpanElement;
+const decayValue = document.getElementById('decayValue') as HTMLSpanElement;
+const sustainValue = document.getElementById('sustainValue') as HTMLSpanElement;
+const releaseValue = document.getElementById('releaseValue') as HTMLSpanElement;
 
 // Synth setup
 let synth: any = new Tone.PolySynth(Tone.Synth).toDestination();
@@ -262,6 +293,31 @@ volumeSlider.addEventListener('input', (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
   synth.volume.value = value;
   volumeValue.textContent = `${value} dB`;
+});
+
+// ADSR event listeners
+attackSlider.addEventListener('input', (e) => {
+  const value = parseFloat((e.target as HTMLInputElement).value);
+  attackValue.textContent = value.toFixed(3);
+  synth.set({ envelope: { attack: value } });
+});
+
+decaySlider.addEventListener('input', (e) => {
+  const value = parseFloat((e.target as HTMLInputElement).value);
+  decayValue.textContent = value.toFixed(3);
+  synth.set({ envelope: { decay: value } });
+});
+
+sustainSlider.addEventListener('input', (e) => {
+  const value = parseFloat((e.target as HTMLInputElement).value);
+  sustainValue.textContent = value.toFixed(2);
+  synth.set({ envelope: { sustain: value } });
+});
+
+releaseSlider.addEventListener('input', (e) => {
+  const value = parseFloat((e.target as HTMLInputElement).value);
+  releaseValue.textContent = value.toFixed(3);
+  synth.set({ envelope: { release: value } });
 });
 
 // Initialize with default file
