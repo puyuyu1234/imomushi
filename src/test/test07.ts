@@ -40,6 +40,14 @@ container.innerHTML = `
           <option value="DuoSynth">Duo Synth (デュアル)</option>
         </select>
       </label>
+      <label style="margin-left: 10px;">Waveform:
+        <select id="waveformSelect" style="padding: 5px; font-size: 14px;">
+          <option value="sine">正弦波 (Sine)</option>
+          <option value="triangle">三角波 (Triangle)</option>
+          <option value="square">矩形波 (Square)</option>
+          <option value="sawtooth">ノコギリ波 (Sawtooth)</option>
+        </select>
+      </label>
     </div>
     <div style="margin: 20px 0;">
       <label>Volume: <input id="volumeSlider" type="range" min="-40" max="0" value="-10" step="1" /></label>
@@ -60,6 +68,7 @@ const playBtn = document.getElementById('playBtn') as HTMLButtonElement;
 const stopBtn = document.getElementById('stopBtn') as HTMLButtonElement;
 const loopBtn = document.getElementById('loopBtn') as HTMLButtonElement;
 const synthSelect = document.getElementById('synthSelect') as HTMLSelectElement;
+const waveformSelect = document.getElementById('waveformSelect') as HTMLSelectElement;
 const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
 const volumeValue = document.getElementById('volumeValue') as HTMLSpanElement;
 const statusText = document.getElementById('status') as HTMLSpanElement;
@@ -228,8 +237,26 @@ loopBtn.addEventListener('click', toggleLoop);
 synthSelect.addEventListener('change', (e) => {
   const selectedType = (e.target as HTMLSelectElement).value;
   synth = createSynth(selectedType);
+  // Apply current waveform to new synth
+  updateWaveform(waveformSelect.value);
   console.log('Synth changed to:', selectedType);
 });
+
+waveformSelect.addEventListener('change', (e) => {
+  const selectedWaveform = (e.target as HTMLSelectElement).value;
+  updateWaveform(selectedWaveform);
+  console.log('Waveform changed to:', selectedWaveform);
+});
+
+// Update synth waveform
+function updateWaveform(waveformType: string) {
+  // Set waveform for all voices in PolySynth
+  synth.set({
+    oscillator: {
+      type: waveformType
+    }
+  });
+}
 
 volumeSlider.addEventListener('input', (e) => {
   const value = parseFloat((e.target as HTMLInputElement).value);
