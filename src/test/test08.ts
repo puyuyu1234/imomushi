@@ -9,8 +9,8 @@ import { Midi } from "@tonejs/midi";
 // Track configuration interface
 interface TrackConfig {
   synth: any;
-  chorus: any;
   waveformAnalyzer: any;
+  fftAnalyzer: any;
   synthType: string;
   waveform: string;
   attack: number;
@@ -18,10 +18,6 @@ interface TrackConfig {
   sustain: number;
   release: number;
   volume: number;
-  chorusFrequency: number;
-  chorusDelayTime: number;
-  chorusDepth: number;
-  chorusWet: number;
   muted: boolean;
   solo: boolean;
 }
@@ -37,8 +33,8 @@ const trackConfigs: TrackConfig[] = [
   // Track 1: Noise, sine, 0.001, 0.5, 0, 0.001, -18dB
   {
     synth: null,
-    chorus: null,
     waveformAnalyzer: null,
+    fftAnalyzer: null,
     synthType: "NoiseSynth",
     waveform: "sine",
     attack: 0.001,
@@ -46,18 +42,14 @@ const trackConfigs: TrackConfig[] = [
     sustain: 0,
     release: 0.001,
     volume: -22,
-    chorusFrequency: 1.5,
-    chorusDelayTime: 3.5,
-    chorusDepth: 0.7,
-    chorusWet: 0.0,
     muted: false,
     solo: false,
   },
   // Track 2: Basic, square, 0.001, 0.15, 0, 0.001, -10dB
   {
     synth: null,
-    chorus: null,
     waveformAnalyzer: null,
+    fftAnalyzer: null,
     synthType: "Synth",
     waveform: "square",
     attack: 0.001,
@@ -65,18 +57,14 @@ const trackConfigs: TrackConfig[] = [
     sustain: 0.15,
     release: 0.001,
     volume: -10,
-    chorusFrequency: 1.5,
-    chorusDelayTime: 3.5,
-    chorusDepth: 0.7,
-    chorusWet: 0.0,
     muted: false,
     solo: false,
   },
   // Track 3: Basic, sawtooth, 0.001, 1, 0.3, 1, -10dB
   {
     synth: null,
-    chorus: null,
     waveformAnalyzer: null,
+    fftAnalyzer: null,
     synthType: "Synth",
     waveform: "sawtooth",
     attack: 0.001,
@@ -84,18 +72,14 @@ const trackConfigs: TrackConfig[] = [
     sustain: 0.1,
     release: 1,
     volume: -10,
-    chorusFrequency: 1.5,
-    chorusDelayTime: 3.5,
-    chorusDepth: 0.7,
-    chorusWet: 0.0,
     muted: false,
     solo: false,
   },
   // Track 4: Basic, square, 0, 0.4, 0.001, 0.6, -10dB
   {
     synth: null,
-    chorus: null,
     waveformAnalyzer: null,
+    fftAnalyzer: null,
     synthType: "Synth",
     waveform: "square",
     attack: 0.4,
@@ -103,18 +87,14 @@ const trackConfigs: TrackConfig[] = [
     sustain: 1,
     release: 0.6,
     volume: -15,
-    chorusFrequency: 1.5,
-    chorusDelayTime: 3.5,
-    chorusDepth: 0.7,
-    chorusWet: 0.0,
     muted: false,
     solo: false,
   },
   // Track 5: Basic, sawtooth, 0.001, 0.5, 0.1, 0.001, -10dB
   {
     synth: null,
-    chorus: null,
     waveformAnalyzer: null,
+    fftAnalyzer: null,
     synthType: "Synth",
     waveform: "sawtooth",
     attack: 0.001,
@@ -122,10 +102,6 @@ const trackConfigs: TrackConfig[] = [
     sustain: 0.1,
     release: 0.001,
     volume: -10,
-    chorusFrequency: 1.5,
-    chorusDelayTime: 3.5,
-    chorusDepth: 0.7,
-    chorusWet: 0.0,
     muted: false,
     solo: false,
   },
@@ -244,31 +220,11 @@ function createUI() {
         </div>
 
         <hr style="border: 1px solid #444; margin: 15px 0;" />
-        <h4 style="color: #00ff88; margin-bottom: 10px;">Chorus</h4>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; margin-bottom: 3px;">Frequency: <span id="chorusFreqValue${i}" style="color: #00ff88;">1.50Hz</span></label>
-          <input id="chorusFreq${i}" type="range" min="0.1" max="10" step="0.1" value="1.5" style="width: 100%;" />
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; margin-bottom: 3px;">Delay Time: <span id="chorusDelayValue${i}" style="color: #00ff88;">3.50ms</span></label>
-          <input id="chorusDelay${i}" type="range" min="1" max="10" step="0.1" value="3.5" style="width: 100%;" />
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; margin-bottom: 3px;">Depth: <span id="chorusDepthValue${i}" style="color: #00ff88;">0.70</span></label>
-          <input id="chorusDepth${i}" type="range" min="0" max="1" step="0.01" value="0.7" style="width: 100%;" />
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; margin-bottom: 3px;">Wet: <span id="chorusWetValue${i}" style="color: #00ff88;">0.00</span></label>
-          <input id="chorusWet${i}" type="range" min="0" max="1" step="0.01" value="0.0" style="width: 100%;" />
-        </div>
-
-        <hr style="border: 1px solid #444; margin: 15px 0;" />
         <h4 style="color: #00ff88; margin-bottom: 10px;">Waveform</h4>
         <canvas id="waveformCanvas${i}" width="260" height="100" style="width: 100%; height: 100px; background: #0a0a0a; border: 1px solid #00ff88; border-radius: 4px;"></canvas>
+
+        <h4 style="color: #00ff88; margin-top: 15px; margin-bottom: 10px;">Spectrum</h4>
+        <canvas id="spectrumCanvas${i}" width="260" height="100" style="width: 100%; height: 100px; background: #0a0a0a; border: 1px solid #00ff88; border-radius: 4px;"></canvas>
       </div>
     `;
   }
@@ -327,33 +283,28 @@ function initializeSynths() {
     if (trackConfigs[i].synth) {
       trackConfigs[i].synth.dispose();
     }
-    if (trackConfigs[i].chorus) {
-      trackConfigs[i].chorus.dispose();
-    }
     if (trackConfigs[i].waveformAnalyzer) {
       trackConfigs[i].waveformAnalyzer.dispose();
+    }
+    if (trackConfigs[i].fftAnalyzer) {
+      trackConfigs[i].fftAnalyzer.dispose();
     }
 
     // Create synth
     trackConfigs[i].synth = createSynth(trackConfigs[i].synthType);
     trackConfigs[i].synth.volume.value = trackConfigs[i].volume;
 
-    // Create waveform analyzer
-    trackConfigs[i].waveformAnalyzer = new Tone.Waveform(256);
+    // Create waveform analyzer (larger buffer for low-frequency stability)
+    trackConfigs[i].waveformAnalyzer = new Tone.Waveform(2048);
 
-    // Create chorus and connect
-    const config = trackConfigs[i];
-    trackConfigs[i].chorus = new Tone.Chorus(
-      config.chorusFrequency,
-      config.chorusDelayTime,
-      config.chorusDepth
-    ).toDestination();
-    trackConfigs[i].chorus.wet.value = config.chorusWet;
+    // Create FFT analyzer for spectrum display
+    trackConfigs[i].fftAnalyzer = new Tone.FFT(128);
 
-    // Connect synth -> waveform -> chorus -> destination
+    // Connect synth -> waveform & fft -> destination
     trackConfigs[i].synth.disconnect();
     trackConfigs[i].synth.connect(trackConfigs[i].waveformAnalyzer);
-    trackConfigs[i].synth.connect(trackConfigs[i].chorus);
+    trackConfigs[i].synth.connect(trackConfigs[i].fftAnalyzer);
+    trackConfigs[i].synth.toDestination();
 
     updateSynthSettings(i);
   }
@@ -391,14 +342,6 @@ function updateSynthSettings(trackIndex: number) {
 
   // Update volume
   synth.volume.value = config.volume;
-
-  // Update chorus settings
-  if (config.chorus) {
-    config.chorus.frequency.value = config.chorusFrequency;
-    config.chorus.delayTime = config.chorusDelayTime;
-    config.chorus.depth = config.chorusDepth;
-    config.chorus.wet.value = config.chorusWet;
-  }
 }
 
 // Setup event listeners for all tracks
@@ -495,64 +438,15 @@ function setupEventListeners() {
       volumeValue.textContent = value + "dB";
       updateSynthSettings(trackIndex);
     });
-
-    // Chorus controls
-    const chorusFreqInput = document.getElementById(
-      `chorusFreq${i}`
-    ) as HTMLInputElement;
-    const chorusFreqValue = document.getElementById(
-      `chorusFreqValue${i}`
-    ) as HTMLSpanElement;
-    chorusFreqInput.addEventListener("input", (e) => {
-      const value = parseFloat((e.target as HTMLInputElement).value);
-      trackConfigs[trackIndex].chorusFrequency = value;
-      chorusFreqValue.textContent = value.toFixed(2) + "Hz";
-      updateSynthSettings(trackIndex);
-    });
-
-    const chorusDelayInput = document.getElementById(
-      `chorusDelay${i}`
-    ) as HTMLInputElement;
-    const chorusDelayValue = document.getElementById(
-      `chorusDelayValue${i}`
-    ) as HTMLSpanElement;
-    chorusDelayInput.addEventListener("input", (e) => {
-      const value = parseFloat((e.target as HTMLInputElement).value);
-      trackConfigs[trackIndex].chorusDelayTime = value;
-      chorusDelayValue.textContent = value.toFixed(2) + "ms";
-      updateSynthSettings(trackIndex);
-    });
-
-    const chorusDepthInput = document.getElementById(
-      `chorusDepth${i}`
-    ) as HTMLInputElement;
-    const chorusDepthValue = document.getElementById(
-      `chorusDepthValue${i}`
-    ) as HTMLSpanElement;
-    chorusDepthInput.addEventListener("input", (e) => {
-      const value = parseFloat((e.target as HTMLInputElement).value);
-      trackConfigs[trackIndex].chorusDepth = value;
-      chorusDepthValue.textContent = value.toFixed(2);
-      updateSynthSettings(trackIndex);
-    });
-
-    const chorusWetInput = document.getElementById(
-      `chorusWet${i}`
-    ) as HTMLInputElement;
-    const chorusWetValue = document.getElementById(
-      `chorusWetValue${i}`
-    ) as HTMLSpanElement;
-    chorusWetInput.addEventListener("input", (e) => {
-      const value = parseFloat((e.target as HTMLInputElement).value);
-      trackConfigs[trackIndex].chorusWet = value;
-      chorusWetValue.textContent = value.toFixed(2);
-      updateSynthSettings(trackIndex);
-    });
   }
 }
 
 let midiData: Midi | null = null;
 let currentParts: (Tone.Part | null)[] = [null, null, null, null, null];
+
+// Configure Tone.js context for better mobile performance
+// Use "playback" latency hint for better CPU efficiency on low-end devices
+Tone.setContext(new Tone.Context({ latencyHint: "playback" }));
 
 // Get transport instance
 const transport = Tone.getTransport();
@@ -676,10 +570,12 @@ function updateTimeDisplay() {
   updateTime();
 }
 
-// Draw waveforms
+// Draw waveforms with oscilloscope-style trigger sync
 function drawWaveforms() {
   for (let i = 0; i < 5; i++) {
-    const canvas = document.getElementById(`waveformCanvas${i}`) as HTMLCanvasElement;
+    const canvas = document.getElementById(
+      `waveformCanvas${i}`
+    ) as HTMLCanvasElement;
     if (!canvas) continue;
 
     const ctx = canvas.getContext("2d");
@@ -697,16 +593,40 @@ function drawWaveforms() {
 
     // Get waveform data
     const values = waveform.getValue();
-    const sliceWidth = width / values.length;
+    if (values.length === 0) continue;
 
-    // Draw waveform
+    // Find peak for zero-crossing detection
+    let peakForTrigger = 0;
+    for (let j = 0; j < values.length; j++) {
+      peakForTrigger = Math.max(peakForTrigger, Math.abs(values[j]));
+    }
+    const triggerThreshold = peakForTrigger * 0.1; // 10% of peak
+
+    // Find zero-crossing trigger point (rising edge)
+    // Search in first 75% of buffer to ensure we have enough data to display
+    let triggerIndex = 0;
+    for (let j = 1; j < values.length * 0.75; j++) {
+      if (values[j - 1] < triggerThreshold && values[j] >= triggerThreshold) {
+        triggerIndex = j;
+        break;
+      }
+    }
+
+    // Display multiple periods: use more samples for low frequencies
+    // This allows 2-4 periods to be visible even for bass notes
+    const displayLength = Math.min(1024, values.length - triggerIndex);
+
+    const sliceWidth = width / displayLength;
+
+    // Draw waveform synchronized to trigger point
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#00ff88";
     ctx.beginPath();
 
     let x = 0;
-    for (let j = 0; j < values.length; j++) {
-      const v = (values[j] + 1) / 2; // Normalize from [-1, 1] to [0, 1]
+    for (let j = 0; j < displayLength; j++) {
+      // Convert from [-1, 1] to [0, 1]
+      const v = (values[triggerIndex + j] + 1) / 2;
       const y = v * height;
 
       if (j === 0) {
@@ -732,6 +652,55 @@ function drawWaveforms() {
   requestAnimationFrame(drawWaveforms);
 }
 
+// Draw spectrum with bar graph
+function drawSpectrum() {
+  for (let i = 0; i < 5; i++) {
+    const canvas = document.getElementById(
+      `spectrumCanvas${i}`
+    ) as HTMLCanvasElement;
+    if (!canvas) continue;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) continue;
+
+    const fft = trackConfigs[i].fftAnalyzer;
+    if (!fft) continue;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear canvas
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(0, 0, width, height);
+
+    // Get frequency data
+    const values = fft.getValue();
+    const barWidth = width / values.length;
+
+    // Draw bars
+    for (let j = 0; j < values.length; j++) {
+      // Convert from dB to normalized value (0-1)
+      // FFT returns values typically in range -100 to 0 dB
+      const db = values[j] as number;
+      const normalized = Math.max(0, (db + 100) / 100);
+      const barHeight = normalized * height;
+
+      // Color gradient based on frequency
+      const hue = (j / values.length) * 120; // 0 (red) to 120 (green)
+      ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+
+      ctx.fillRect(
+        j * barWidth,
+        height - barHeight,
+        barWidth - 1,
+        barHeight
+      );
+    }
+  }
+
+  requestAnimationFrame(drawSpectrum);
+}
+
 // Event listeners for playback controls
 playBtn.addEventListener("click", playMidi);
 stopBtn.addEventListener("click", stopMidi);
@@ -741,5 +710,6 @@ initializeSynths();
 setupEventListeners();
 loadMidi();
 
-// Start waveform drawing loop
+// Start waveform and spectrum drawing loops
 drawWaveforms();
+drawSpectrum();
